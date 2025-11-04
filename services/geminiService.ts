@@ -1,4 +1,3 @@
-
 import { GoogleGenAI } from "@google/genai";
 import { AspectRatio } from '../types';
 
@@ -28,5 +27,35 @@ export const generateWallpapers = async (prompt: string, aspectRatio: AspectRati
             throw new Error(`Failed to generate wallpapers: ${error.message}`);
         }
         throw new Error("An unknown error occurred during image generation.");
+    }
+};
+
+export const generateRandomPrompt = async (): Promise<string> => {
+    try {
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const systemInstruction = "You are a creative assistant that generates short, visually inspiring prompts for an AI image generator. The prompts should be suitable for creating stunning phone wallpapers. Be concise and imaginative. Do not include quotes or any preamble. Just provide the prompt text.";
+        const promptForPrompt = "Generate a random wallpaper prompt.";
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: promptForPrompt,
+            config: {
+                systemInstruction: systemInstruction,
+                temperature: 1.2,
+            },
+        });
+        
+        const text = response.text.trim().replace(/"/g, '');
+        if (!text) {
+            throw new Error("Generated prompt was empty.");
+        }
+        return text;
+
+    } catch (error) {
+        console.error("Error generating random prompt:", error);
+        if (error instanceof Error) {
+            throw new Error(`Failed to generate a random prompt: ${error.message}`);
+        }
+        throw new Error("An unknown error occurred during random prompt generation.");
     }
 };

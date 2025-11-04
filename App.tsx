@@ -1,9 +1,8 @@
-
 import React, { useState, useCallback } from 'react';
 import PromptForm from './components/PromptForm';
 import ImageGrid from './components/ImageGrid';
 import FullscreenModal from './components/FullscreenModal';
-import { generateWallpapers } from './services/geminiService';
+import { generateWallpapers, generateRandomPrompt } from './services/geminiService';
 import { AspectRatio } from './types';
 
 const App: React.FC = () => {
@@ -30,6 +29,23 @@ const App: React.FC = () => {
             setIsLoading(false);
         }
     }, []);
+
+    const handleFeelingLucky = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        setImages([]);
+        
+        try {
+            const randomPrompt = await generateRandomPrompt();
+            setPrompt(randomPrompt);
+            const generatedImages = await generateWallpapers(randomPrompt, aspectRatio);
+            setImages(generatedImages);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "An unexpected error occurred while feeling lucky.");
+        } finally {
+            setIsLoading(false);
+        }
+    }, [aspectRatio]);
 
     const handleRemix = useCallback(() => {
         if (prompt) {
@@ -66,7 +82,14 @@ const App: React.FC = () => {
                 <ImageGrid images={images} onImageClick={setSelectedImage} isLoading={isLoading} prompt={prompt} />
             </main>
             
-            <PromptForm onGenerate={handleGenerate} isLoading={isLoading} initialPrompt={prompt} />
+            <PromptForm 
+                onGenerate={handleGenerate} 
+                onFeelingLucky={handleFeelingLucky}
+                isLoading={isLoading} 
+                initialPrompt={prompt}
+                aspectRatio={aspectRatio}
+                onAspectRatioChange={setAspectRatio}
+            />
 
             {selectedImage && (
                 <FullscreenModal

@@ -1,18 +1,30 @@
-
-import React, { useState } from 'react';
-import { AspectRatio, AspectRatioOption } from '../types';
+import React, { useState, useEffect } from 'react';
+import { AspectRatio } from '../types';
 import { ASPECT_RATIO_OPTIONS } from '../constants';
-import { SparklesIcon } from './icons';
+import { SparklesIcon, DiceIcon } from './icons';
 
 interface PromptFormProps {
     onGenerate: (prompt: string, aspectRatio: AspectRatio) => void;
+    onFeelingLucky: () => void;
     isLoading: boolean;
-    initialPrompt?: string;
+    initialPrompt: string;
+    aspectRatio: AspectRatio;
+    onAspectRatioChange: (newRatio: AspectRatio) => void;
 }
 
-const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading, initialPrompt = "Rainy cyberpunk lo-fi" }) => {
+const PromptForm: React.FC<PromptFormProps> = ({ 
+    onGenerate, 
+    onFeelingLucky, 
+    isLoading, 
+    initialPrompt, 
+    aspectRatio, 
+    onAspectRatioChange 
+}) => {
     const [prompt, setPrompt] = useState(initialPrompt);
-    const [aspectRatio, setAspectRatio] = useState<AspectRatio>('9:16');
+
+    useEffect(() => {
+        setPrompt(initialPrompt);
+    }, [initialPrompt]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,7 +47,7 @@ const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading, initialP
                 <div className="w-full sm:w-auto flex items-center gap-3">
                     <select
                         value={aspectRatio}
-                        onChange={(e) => setAspectRatio(e.target.value as AspectRatio)}
+                        onChange={(e) => onAspectRatioChange(e.target.value as AspectRatio)}
                         className="w-full sm:w-auto bg-gray-700 border border-gray-600 text-white rounded-lg p-3 appearance-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200"
                         disabled={isLoading}
                     >
@@ -43,6 +55,16 @@ const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading, initialP
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                     </select>
+                    <button
+                        type="button"
+                        onClick={onFeelingLucky}
+                        disabled={isLoading}
+                        className="flex items-center justify-center px-4 py-3 bg-teal-500 text-white font-semibold rounded-lg hover:bg-teal-600 disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors duration-200"
+                        title="I'm Feeling Lucky"
+                    >
+                        <DiceIcon />
+                        <span className="hidden sm:inline ml-2">Lucky</span>
+                    </button>
                     <button
                         type="submit"
                         disabled={isLoading || !prompt.trim()}
